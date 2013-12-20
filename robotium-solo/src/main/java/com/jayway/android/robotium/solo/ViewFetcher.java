@@ -106,6 +106,73 @@ class ViewFetcher {
 	}
 
 	/**
+	 * Confirms whether a View is contained in the hierarchy
+	 *
+	 * @param onlySufficientlyVisible if only sufficiently visible views should be returned
+	 * @return true if the view is contained in the hierarchy
+	 */
+
+	public boolean containsView(View v, boolean onlySufficientlyVisible) {
+		final View[] views = getWindowDecorViews();
+		final View[] nonDecorViews = getNonDecorViews(views);
+		View view = null;
+
+		if(nonDecorViews != null){
+			for(int i = 0; i < nonDecorViews.length; i++){
+				view = nonDecorViews[i];
+				if (view == null) continue;
+
+				if (v.equals(view)) return true;
+
+				try {
+					if (containsView(v, (ViewGroup)view, onlySufficientlyVisible)) return true;
+				} catch (Exception ignored) {}
+			}
+		}
+
+		if (views != null && views.length > 0) {
+			view = getRecentDecorView(views);
+			if (view == null) return false;
+
+			if (v.equals(view)) return true;
+
+			try {
+				if (containsView(v, (ViewGroup)view, onlySufficientlyVisible)) return true;
+			} catch (Exception ignored) {}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Confirm whether a view is contained in the {@code viewGroup} or its children
+	 *
+	 * @param view the @code View} to confirm
+	 * @param viewGroup the {@code ViewGroup} to investigate
+	 * @param onlySufficientlyVisible if only sufficiently visible views should be returned
+	 *
+	 * @return true if the view is contained in the viewGroup
+	 */
+
+	private boolean containsView(View view, ViewGroup viewGroup, boolean onlySufficientlyVisible) {
+		if(viewGroup != null){
+			for (int i = 0; i < viewGroup.getChildCount(); i++) {
+				final View child = viewGroup.getChildAt(i);
+
+				if ((!onlySufficientlyVisible || isViewSufficientlyShown(child))
+						&& view.equals(child))
+					return true;
+
+				if (child instanceof ViewGroup) {
+					if (containsView(view, (ViewGroup) child, onlySufficientlyVisible)) return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns the most recent DecorView
 	 *
 	 * @param views the views to check

@@ -157,18 +157,11 @@ class Searcher {
 	 * Searches for a given view.
 	 * 
 	 * @param view the view to search
-	 * @param scroll true if scrolling should be performed
 	 * @return true if view is found
 	 */
 
 	public <T extends View> boolean searchFor(View view) {
-		ArrayList<View> views = viewFetcher.getAllViews(true);
-		for(View v : views){
-			if(v.equals(view)){
-				return true;
-			}
-		}
-		return false;
+		return viewFetcher.containsView(view, true);
 	}
 
 	/**
